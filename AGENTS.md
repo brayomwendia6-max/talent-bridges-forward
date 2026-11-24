@@ -28,3 +28,10 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- All user data (profile, portfolio, applications, mentorship requests) lives in browser localStorage via `src/lib/store.ts` (useSyncExternalStore, empty server snapshot); the user asked for on-device storage with no backend.
+- Pages that render stored data gate on `useHydrated()` so SSR and first client render match.
+- Demo listings, mentors, and baseline counts live in `src/lib/demo-data.ts`; dashboard totals are computed by `computeStats` in `src/lib/stats.ts` (covered by `src/lib/stats.test.ts`).
+- Brand colors are semantic tokens in `src/styles.css` (navy, teal, demo); never hardcode color utilities.

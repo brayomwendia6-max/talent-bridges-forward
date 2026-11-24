@@ -1,0 +1,42 @@
+import { DEMO_BASELINE, OPPORTUNITIES } from "./demo-data";
+import type { AppState, Profile } from "./types";
+
+/** A profile counts as registered once the user has saved a name. */
+export function isProfileRegistered(profile: Profile): boolean {
+  return profile.name.trim().length > 0;
+}
+
+/** Share of the main profile sections that are filled in, 0–100. */
+export function profileCompleteness(profile: Profile): number {
+  const checks = [
+    profile.name.trim().length > 0,
+    profile.headline.trim().length > 0,
+    profile.background.trim().length > 0,
+    profile.education.length > 0,
+    profile.experience.length > 0,
+    profile.skills.length > 0,
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+export type DashboardStats = {
+  registeredProfiles: number;
+  listedOpportunities: number;
+  mentorshipRequests: number;
+  applications: number;
+  portfolioItems: number;
+  completeness: number;
+};
+
+/** Dashboard totals = demo starting numbers + what the user saved on this device. */
+export function computeStats(state: AppState): DashboardStats {
+  return {
+    registeredProfiles:
+      DEMO_BASELINE.registeredProfiles + (isProfileRegistered(state.profile) ? 1 : 0),
+    listedOpportunities: OPPORTUNITIES.length,
+    mentorshipRequests: DEMO_BASELINE.mentorshipRequests + state.mentorshipRequests.length,
+    applications: DEMO_BASELINE.applications + state.applications.length,
+    portfolioItems: DEMO_BASELINE.portfolioItems + state.portfolio.length,
+    completeness: profileCompleteness(state.profile),
+  };
+}
