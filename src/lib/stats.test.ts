@@ -1,33 +1,37 @@
 import { describe, expect, it } from "vitest";
-import { DEMO_BASELINE, OPPORTUNITIES } from "./demo-data";
-import { computeStats, profileCompleteness } from "./stats";
+import { OPPORTUNITIES } from "./demo-data";
+import { computeUserStats, DEMO_STATS, profileCompleteness } from "./stats";
 import { EMPTY_PROFILE, EMPTY_STATE } from "./store";
 import type { AppState } from "./types";
 
 describe("dashboard stats", () => {
-  it("shows demo starting numbers when nothing is saved", () => {
-    const s = computeStats(EMPTY_STATE);
-    expect(s.registeredProfiles).toBe(248);
-    expect(s.mentorshipRequests).toBe(87);
-    expect(s.listedOpportunities).toBe(OPPORTUNITIES.length);
+  it("shows zero user activity when nothing is saved", () => {
+    const s = computeUserStats(EMPTY_STATE);
+    expect(s).toMatchObject({ registeredProfiles: 0, mentorshipRequests: 0, applications: 0, portfolioItems: 0 });
   });
 
-  it("adds one registered profile once the user saves a name", () => {
+  it("keeps demo numbers separate and fixed", () => {
+    expect(DEMO_STATS.registeredProfiles).toBe(248);
+    expect(DEMO_STATS.mentorshipRequests).toBe(87);
+    expect(DEMO_STATS.listedOpportunities).toBe(OPPORTUNITIES.length);
+  });
+
+  it("counts one registered profile once the user saves a name", () => {
     const state: AppState = { ...EMPTY_STATE, profile: { ...EMPTY_PROFILE, name: "Amal" } };
-    expect(computeStats(state).registeredProfiles).toBe(DEMO_BASELINE.registeredProfiles + 1);
+    expect(computeUserStats(state).registeredProfiles).toBe(1);
   });
 
-  it("counts each mentorship request, application and portfolio item", () => {
+  it("counts each real mentorship request, application and portfolio item without demo figures", () => {
     const state = {
       ...EMPTY_STATE,
       mentorshipRequests: [{}, {}],
       applications: [{}, {}, {}],
       portfolio: [{}],
     } as unknown as AppState;
-    const s = computeStats(state);
-    expect(s.mentorshipRequests).toBe(DEMO_BASELINE.mentorshipRequests + 2);
-    expect(s.applications).toBe(DEMO_BASELINE.applications + 3);
-    expect(s.portfolioItems).toBe(DEMO_BASELINE.portfolioItems + 1);
+    const s = computeUserStats(state);
+    expect(s.mentorshipRequests).toBe(2);
+    expect(s.applications).toBe(3);
+    expect(s.portfolioItems).toBe(1);
   });
 
   it("rates profile completeness across six sections", () => {

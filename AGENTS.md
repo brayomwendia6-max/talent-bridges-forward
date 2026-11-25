@@ -33,5 +33,6 @@ use the editor.
 
 - All user data (profile, portfolio, applications, mentorship requests) lives in browser localStorage via `src/lib/store.ts` (useSyncExternalStore, empty server snapshot); the user asked for on-device storage with no backend.
 - Pages that render stored data gate on `useHydrated()` so SSR and first client render match.
-- Demo listings, mentors, and baseline counts live in `src/lib/demo-data.ts`; dashboard totals are computed by `computeStats` in `src/lib/stats.ts` (covered by `src/lib/stats.test.ts`).
+- Demo listings, mentors, and baseline counts live in `src/lib/demo-data.ts`; real user counts (`computeUserStats`) and demo counts (`DEMO_STATS`) in `src/lib/stats.ts` are never summed, so real activity is never mixed with sample figures.
+- Evidence status (Self-Reported / Evidence Provided / Partner Verified) is derived in `src/lib/evidence.ts`; Partner Verified requires a partner record the app never writes itself, so the app cannot claim verification.
 - Brand colors are semantic tokens in `src/styles.css` (navy, teal, demo); never hardcode color utilities.

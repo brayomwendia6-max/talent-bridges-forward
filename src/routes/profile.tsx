@@ -9,11 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/site/PageHeader";
-import { LocalStorageNotice, PrivacyNotice, SelfReportedBadge } from "@/components/site/Notices";
+import { EvidenceBadge, EvidenceLegend, LocalStorageNotice, PrivacyNotice } from "@/components/site/Notices";
+import { educationStatus, skillStatus } from "@/lib/evidence";
 import { TagInput } from "@/components/site/TagInput";
 import { actions, newId, useAppState } from "@/lib/store";
 import { profileCompleteness } from "@/lib/stats";
-import type { Profile } from "@/lib/types";
+import type { PortfolioItem, Profile } from "@/lib/types";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -52,7 +53,10 @@ function ProfilePage() {
           <PrivacyNotice />
         </div>
         {hydrated ? (
-          <ProfileForm key={state.profile.updatedAt ?? "new"} initial={state.profile} />
+          <>
+            <EvidenceLegend className="mt-6" />
+            <ProfileForm key={state.profile.updatedAt ?? "new"} initial={state.profile} portfolio={state.portfolio} />
+          </>
         ) : (
           <div className="mt-8 space-y-4">
             <Skeleton className="h-40 w-full" />
@@ -82,7 +86,7 @@ function Section({
   );
 }
 
-function ProfileForm({ initial }: { initial: Profile }) {
+function ProfileForm({ initial, portfolio }: { initial: Profile; portfolio: PortfolioItem[] }) {
   const [p, setP] = useState<Profile>(initial);
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) => setP((s) => ({ ...s, [key]: value }));
   const completeness = profileCompleteness(p);
@@ -155,6 +159,11 @@ function ProfileForm({ initial }: { initial: Profile }) {
                 <Button type="button" variant="ghost" size="icon" aria-label="Remove education" onClick={() => set("education", p.education.filter((x) => x.id !== ed.id))}>
                   <Trash2 />
                 </Button>
+                <div className="space-y-1.5 sm:col-span-3">
+                  <Label htmlFor={`ed-ev-${ed.id}`}>Evidence link (optional)</Label>
+                  <Input id={`ed-ev-${ed.id}`} type="url" value={ed.evidenceLink ?? ""} placeholder="https:// link to your certificate or transcript" onChange={(e) => set("education", p.education.map((x, j) => (j === i ? { ...x, evidenceLink: e.target.value } : x)))} />
+                </div>
+                <div className="sm:pb-2"><EvidenceBadge status={educationStatus(ed)} /></div>
               </div>
             ))}
             <Button type="button" variant="outline" onClick={() => set("education", [...p.education, { id: newId(), school: "", qualification: "", year: "" }])}>
@@ -202,6 +211,25 @@ function ProfileForm({ initial }: { initial: Profile }) {
 
         <Section title="Skills" description="Add skills one at a time. Skills you add here are shown as self-reported.">
           <TagInput id="skills" value={p.skills} onChange={(v) => set("skills", v)} placeholder="e.g. Project Management, then press Enter" />
+          {p.skills.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {p.skills.map((s) => {
+                const st = skillStatus(s, portfolio);
+                return (
+                  <li key={s} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2.5 text-sm">
+                    <span className="font-medium">{s}</span>
+                    <span className="flex items-center gap-2">
+                      <EvidenceBadge status={st} />
+                      {st === "self-reported" && (
+                        <Link to="/portfolio" className="text-xs font-semibold text-teal hover:underline">Add evidence</Link>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <p className="mt-3 text-xs text-muted-foreground">To add evidence for a skill, add a portfolio item with a link or evidence note and list the skill on it.</p>
         </Section>
       </div>
 
@@ -221,7 +249,7 @@ function ProfileForm({ initial }: { initial: Profile }) {
             <p className="flex items-center gap-2 text-muted-foreground"><BriefcaseBusiness className="size-4" /> {p.experience.length} work experience</p>
             {p.skills.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <SelfReportedBadge />
+                <EvidenceBadge status="self-reported" />
                 <span className="text-xs text-muted-foreground">{p.skills.length} skills</span>
               </div>
             )}

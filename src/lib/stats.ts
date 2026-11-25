@@ -19,24 +19,27 @@ export function profileCompleteness(profile: Profile): number {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
-export type DashboardStats = {
+export type UserStats = {
   registeredProfiles: number;
-  listedOpportunities: number;
   mentorshipRequests: number;
   applications: number;
   portfolioItems: number;
   completeness: number;
 };
 
-/** Dashboard totals = demo starting numbers + what the user saved on this device. */
-export function computeStats(state: AppState): DashboardStats {
+/** Real activity saved on this device only. Never mixed with demo numbers. */
+export function computeUserStats(state: AppState): UserStats {
   return {
-    registeredProfiles:
-      DEMO_BASELINE.registeredProfiles + (isProfileRegistered(state.profile) ? 1 : 0),
-    listedOpportunities: OPPORTUNITIES.length,
-    mentorshipRequests: DEMO_BASELINE.mentorshipRequests + state.mentorshipRequests.length,
-    applications: DEMO_BASELINE.applications + state.applications.length,
-    portfolioItems: DEMO_BASELINE.portfolioItems + state.portfolio.length,
+    registeredProfiles: isProfileRegistered(state.profile) ? 1 : 0,
+    mentorshipRequests: state.mentorshipRequests.length,
+    applications: state.applications.length,
+    portfolioItems: state.portfolio.length,
     completeness: profileCompleteness(state.profile),
   };
 }
+
+/** Sample community numbers, always shown separately and labeled Demo Data. */
+export const DEMO_STATS = {
+  ...DEMO_BASELINE,
+  listedOpportunities: OPPORTUNITIES.length,
+} as const;

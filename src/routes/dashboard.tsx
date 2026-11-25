@@ -16,8 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/site/PageHeader";
 import { DemoBadge, LocalStorageNotice } from "@/components/site/Notices";
-import { DEMO_BASELINE } from "@/lib/demo-data";
-import { computeStats, isProfileRegistered } from "@/lib/stats";
+import { computeUserStats, DEMO_STATS, isProfileRegistered } from "@/lib/stats";
 import { actions, EMPTY_STATE, useAppState } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard")({
@@ -38,15 +37,22 @@ function DashboardPage() {
   const hydrated = useHydrated();
   const live = useAppState();
   const state = hydrated ? live : EMPTY_STATE;
-  const stats = computeStats(state);
+  const stats = computeUserStats(state);
   const registered = isProfileRegistered(state.profile);
 
   const cards = [
-    { label: "Registered profiles", value: stats.registeredProfiles, demo: DEMO_BASELINE.registeredProfiles, mine: registered ? 1 : 0, icon: Users, to: "/profile" as const },
-    { label: "Listed opportunities", value: stats.listedOpportunities, demo: stats.listedOpportunities, mine: 0, icon: BriefcaseBusiness, to: "/opportunities" as const },
-    { label: "Mentorship requests", value: stats.mentorshipRequests, demo: DEMO_BASELINE.mentorshipRequests, mine: state.mentorshipRequests.length, icon: HeartHandshake, to: "/mentorship" as const },
-    { label: "Applications sent", value: stats.applications, demo: DEMO_BASELINE.applications, mine: state.applications.length, icon: Send, to: "/opportunities" as const },
-    { label: "Portfolio items", value: stats.portfolioItems, demo: DEMO_BASELINE.portfolioItems, mine: state.portfolio.length, icon: FolderKanban, to: "/portfolio" as const },
+    { label: "Your profile", value: stats.registeredProfiles, icon: Users, to: "/profile" as const },
+    { label: "Your portfolio items", value: stats.portfolioItems, icon: FolderKanban, to: "/portfolio" as const },
+    { label: "Your applications", value: stats.applications, icon: Send, to: "/opportunities" as const },
+    { label: "Your mentorship requests", value: stats.mentorshipRequests, icon: HeartHandshake, to: "/mentorship" as const },
+  ];
+
+  const demoCards = [
+    { label: "Sample profiles", value: DEMO_STATS.registeredProfiles },
+    { label: "Sample opportunities", value: DEMO_STATS.listedOpportunities },
+    { label: "Sample portfolio items", value: DEMO_STATS.portfolioItems },
+    { label: "Sample applications", value: DEMO_STATS.applications },
+    { label: "Sample mentorship requests", value: DEMO_STATS.mentorshipRequests },
   ];
 
   const activity = [
@@ -61,23 +67,38 @@ function DashboardPage() {
       <PageHeader
         eyebrow="Overview"
         title="Dashboard"
-        description="These numbers update as you add profile information, projects, applications, and mentorship requests."
-      >
-        <DemoBadge label="Starting numbers are demo data" className="text-sm" />
-      </PageHeader>
+        description="Your real activity on this device is shown first. Sample community numbers are kept separate and labeled Demo Data."
+      />
 
       <div className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6">
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {cards.map((c) => (
-            <Link key={c.label} to={c.to} className="group rounded-2xl border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift">
-              <span className="grid size-10 place-items-center rounded-lg bg-teal-soft text-teal"><c.icon className="size-5" /></span>
-              <p className="mt-4 font-display text-4xl font-bold tabular-nums" data-testid={`stat-${c.label}`}>{c.value}</p>
-              <p className="mt-1 text-sm font-semibold">{c.label}</p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {c.mine > 0 ? <><span className="font-semibold text-teal">+{c.mine} from you</span> · {c.demo} demo</> : <>{c.demo} demo</>}
-              </p>
-            </Link>
-          ))}
+        <section aria-labelledby="your-activity">
+          <h2 id="your-activity" className="text-xl font-bold">Your activity</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Real numbers from what you saved on this device. No demo data included.</p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {cards.map((c) => (
+              <Link key={c.label} to={c.to} className="group rounded-2xl border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift">
+                <span className="grid size-10 place-items-center rounded-lg bg-teal-soft text-teal"><c.icon className="size-5" /></span>
+                <p className="mt-4 font-display text-4xl font-bold tabular-nums" data-testid={`stat-${c.label}`}>{c.value}</p>
+                <p className="mt-1 text-sm font-semibold">{c.label}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="demo-numbers" className="rounded-2xl border border-dashed border-demo-foreground/30 bg-demo/40 p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="demo-numbers" className="text-xl font-bold">Sample community numbers</h2>
+            <DemoBadge />
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">These are made-up figures for this preview. They never change and are not added to your numbers.</p>
+          <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {demoCards.map((c) => (
+              <div key={c.label} className="rounded-xl bg-card p-4">
+                <dd className="font-display text-2xl font-bold tabular-nums text-muted-foreground">{c.value}</dd>
+                <dt className="mt-1 text-xs font-medium">{c.label}</dt>
+              </div>
+            ))}
+          </dl>
         </section>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">

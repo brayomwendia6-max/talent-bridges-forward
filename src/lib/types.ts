@@ -1,4 +1,9 @@
-export type Education = { id: string; school: string; qualification: string; year: string };
+import type { PartnerVerification } from "./evidence";
+
+export type Education = { id: string; school: string; qualification: string; year: string;
+  evidenceLink?: string;
+  partnerVerification?: PartnerVerification;
+};
 export type Experience = {
   id: string;
   role: string;
@@ -30,6 +35,8 @@ export type PortfolioItem = {
   issuer: string;
   date: string;
   skills: string[];
+  evidenceNote?: string;
+  partnerVerification?: PartnerVerification;
   createdAt: string;
 };
 

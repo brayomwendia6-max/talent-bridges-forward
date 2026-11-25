@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useHydrated } from "@tanstack/react-router";
 import {
   ArrowRight,
   BriefcaseBusiness,
@@ -9,8 +9,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DemoBadge } from "@/components/site/Notices";
-import { computeStats } from "@/lib/stats";
-import { useAppState } from "@/lib/store";
+import { computeUserStats, DEMO_STATS } from "@/lib/stats";
+import { EMPTY_STATE, useAppState } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -61,9 +61,17 @@ const STEPS = [
   },
 ] as const;
 
+const SDGS = [
+  { num: 4, title: "Quality Education", text: "Training listings and mentor advice help people build new skills and keep learning." },
+  { num: 8, title: "Decent Work and Economic Growth", text: "Internships, remote jobs, and fellowships connect skilled people with work that matches their abilities." },
+  { num: 10, title: "Reduced Inequalities", text: "A simple, free place to show skills helps refugees reach opportunities that are often closed to them." },
+  { num: 17, title: "Partnerships for the Goals", text: "TalentBridge brings together employers, mentors, and training organizations to support refugee talent." },
+] as const;
+
 function Home() {
-  const state = useAppState();
-  const stats = computeStats(state);
+  const hydrated = useHydrated();
+  const live = useAppState();
+  const mine = computeUserStats(hydrated ? live : EMPTY_STATE);
 
   return (
     <>
@@ -97,15 +105,15 @@ function Home() {
 
           <div className="rounded-2xl border border-navy-foreground/15 bg-navy-foreground/5 p-6 backdrop-blur sm:p-8">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-navy-foreground/80">Community so far</p>
-              <DemoBadge label="Includes demo numbers" />
+              <p className="text-sm font-semibold text-navy-foreground/80">Sample community</p>
+              <DemoBadge />
             </div>
             <dl className="mt-6 grid grid-cols-2 gap-4">
               {[
-                { label: "Registered profiles", value: stats.registeredProfiles },
-                { label: "Listed opportunities", value: stats.listedOpportunities },
-                { label: "Mentorship requests", value: stats.mentorshipRequests },
-                { label: "Applications sent", value: stats.applications },
+                { label: "Registered profiles", value: DEMO_STATS.registeredProfiles },
+                { label: "Listed opportunities", value: DEMO_STATS.listedOpportunities },
+                { label: "Mentorship requests", value: DEMO_STATS.mentorshipRequests },
+                { label: "Applications sent", value: DEMO_STATS.applications },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl bg-navy-deep/60 p-4">
                   <dd className="font-display text-3xl font-bold text-teal-bright">{s.value}</dd>
@@ -113,6 +121,10 @@ function Home() {
                 </div>
               ))}
             </dl>
+            <p className="mt-4 rounded-xl border border-navy-foreground/15 p-3 text-sm text-navy-foreground/80">
+              <strong className="text-navy-foreground">Your activity on this device:</strong>{" "}
+              {mine.portfolioItems} portfolio items · {mine.applications} applications · {mine.mentorshipRequests} mentor requests
+            </p>
             <Link
               to="/dashboard"
               className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-teal-bright hover:underline"
@@ -172,7 +184,21 @@ function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-20" aria-labelledby="sdg-heading">
+        <p className="text-sm font-semibold uppercase tracking-widest text-teal">Our impact</p>
+        <h2 id="sdg-heading" className="mt-2 text-3xl font-bold sm:text-4xl">Supporting the UN Sustainable Development Goals</h2>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {SDGS.map((g) => (
+            <article key={g.num} className="flex flex-col rounded-2xl border bg-card p-6 shadow-card">
+              <span className="grid size-12 place-items-center rounded-xl bg-navy font-display text-lg font-bold text-navy-foreground">{g.num}</span>
+              <h3 className="mt-4 text-lg font-bold">SDG {g.num}: {g.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{g.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-2xl border p-6 sm:p-8">
             <HardDrive className="size-6 text-teal" />
