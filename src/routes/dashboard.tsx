@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/site/PageHeader";
+import { BackupRestore } from "@/components/site/BackupRestore";
 import { DemoBadge, LocalStorageNotice } from "@/components/site/Notices";
 import { computeUserStats, DEMO_STATS, isProfileRegistered } from "@/lib/stats";
 import { actions, EMPTY_STATE, useAppState } from "@/lib/store";
@@ -138,6 +139,7 @@ function DashboardPage() {
 
         <section className="space-y-4">
           <LocalStorageNotice />
+          {hydrated && <BackupRestore />}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline"><Trash2 /> Delete all my data from this device</Button>

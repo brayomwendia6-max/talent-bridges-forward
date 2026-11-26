@@ -36,3 +36,5 @@ use the editor.
 - Demo listings, mentors, and baseline counts live in `src/lib/demo-data.ts`; real user counts (`computeUserStats`) and demo counts (`DEMO_STATS`) in `src/lib/stats.ts` are never summed, so real activity is never mixed with sample figures.
 - Evidence status (Self-Reported / Evidence Provided / Partner Verified) is derived in `src/lib/evidence.ts`; Partner Verified requires a partner record the app never writes itself, so the app cannot claim verification.
 - Brand colors are semantic tokens in `src/styles.css` (navy, teal, demo); never hardcode color utilities.
+- Backup controls share a versioned, allowlisted schema in `src/lib/backup.ts`; omit partner verification and unknown fields so imported files cannot grant trust or inject unsupported data.
+- Restore replaces local state only after localStorage writes successfully and explicit user confirmation; this prevents duplicates and preserves current data on storage failure.

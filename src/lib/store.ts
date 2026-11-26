@@ -92,6 +92,12 @@ export function newId(): string {
 }
 
 export const actions = {
+  restoreBackup(state: AppState) {
+    // Write first so a failed restore never replaces the current in-memory data.
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    cache = state;
+    listeners.forEach((listener) => listener());
+  },
   saveProfile(profile: Profile) {
     update((s) => ({ ...s, profile: { ...profile, updatedAt: new Date().toISOString() } }));
   },

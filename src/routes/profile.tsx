@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/site/PageHeader";
+import { BackupRestore } from "@/components/site/BackupRestore";
 import { EvidenceBadge, EvidenceLegend, LocalStorageNotice, PrivacyNotice } from "@/components/site/Notices";
 import { educationStatus, skillStatus } from "@/lib/evidence";
 import { TagInput } from "@/components/site/TagInput";
@@ -55,7 +56,8 @@ function ProfilePage() {
         {hydrated ? (
           <>
             <EvidenceLegend className="mt-6" />
-            <ProfileForm key={state.profile.updatedAt ?? "new"} initial={state.profile} portfolio={state.portfolio} />
+            <div className="mt-6"><BackupRestore profilePage /></div>
+            <ProfileForm key={JSON.stringify(state.profile)} initial={state.profile} portfolio={state.portfolio} />
           </>
         ) : (
           <div className="mt-8 space-y-4">
